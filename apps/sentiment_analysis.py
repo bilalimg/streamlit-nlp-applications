@@ -6,9 +6,6 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 file_string = "sentiment_analysis"
 
-st.title("Sentiment Analyzer")
-st.write('\n\n')
-
 
 def dump_pickle(vectorizer, classifier):
     pickle.dump(vectorizer, open(f"models/{file_string}_vectorizer.pickle", "wb"))
@@ -50,17 +47,23 @@ def train_model(train_doc, train_labels):
     return vectorizer, classifier
 
 
-train_doc, train_labels = preprocess_data()
+def app():
+    """The main body"""
 
-if st.sidebar.button("Click to train a new model"):
-    vectorizer, classifier = train_model(train_doc, train_labels)
-else:
-    vectorizer, classifier = load_pickle()
+    st.title("Sentiment Analyzer")
+    st.write('\n\n')
 
-input = st.text_input("Enter The Sentence", "Write Here...")
-if st.button('Predict The Sentiment'):
-    result = classifier.predict(vectorizer.transform([input]))[0]
-    print_text = "Positive" if result[0] == '1' else "Negative"
-    st.success(print_text)
-else:
-    st.write("Press the above button..")
+    train_doc, train_labels = preprocess_data()
+
+    if st.sidebar.button("Click to train a new model"):
+        vectorizer, classifier = train_model(train_doc, train_labels)
+    else:
+        vectorizer, classifier = load_pickle()
+
+    input = st.text_input("Enter The Sentence", "Write Here...")
+    if st.button('Predict The Sentiment'):
+        result = classifier.predict(vectorizer.transform([input]))[0]
+        print_text = "Positive" if result[0] == '1' else "Negative"
+        st.success(print_text)
+    else:
+        st.write("Press the above button..")

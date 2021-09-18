@@ -8,10 +8,6 @@ from sklearn.model_selection import train_test_split
 
 file_string = "language_identifier"
 
-st.title("Language Identifier")
-st.write('\n\n')
-
-
 def dump_pickle(vectorizer, classifier):
     pickle.dump(vectorizer, open(f"models/{file_string}_vectorizer.pickle", "wb"))
     pickle.dump(classifier, open(f"models/{file_string}_finalized_model.sav", 'wb'))
@@ -45,16 +41,32 @@ def train_model(train_doc, train_labels):
     return vectorizer, classifier
 
 
-train_doc, test_doc, train_labels, test_labels = load_data()
+def app():
+    """The main body"""
 
-if st.sidebar.button("Click to train a new model"):
-    vectorizer, classifier = train_model(train_doc, train_labels)
-else:
-    vectorizer, classifier = load_pickle()
+    st.title("Language Identifier")
+    st.write('\n\n')
 
-input = st.text_input("Enter The Sentence", "Write Here...")
-if st.button('Predict The Language'):
-    result = classifier.predict(vectorizer.transform([input]))[0]
-    st.success(result)
-else:
-    st.write("Press the above button..")
+    train_doc, test_doc, train_labels, test_labels = load_data()
+
+    if st.sidebar.button("Click to train a new model"):
+        vectorizer, classifier = train_model(train_doc, train_labels)
+    else:
+        vectorizer, classifier = load_pickle()
+
+
+    input = st.text_input("Enter The Sentence", "Write Here...")
+    if st.button('Predict The Language'):
+        result = classifier.predict(vectorizer.transform([input]))[0]
+        st.success(result)
+    else:
+        st.write("Press the above button..")
+
+
+
+
+
+
+
+
+
