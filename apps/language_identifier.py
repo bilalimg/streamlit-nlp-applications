@@ -8,21 +8,22 @@ from sklearn.model_selection import train_test_split
 
 file_string = "language_identifier"
 
+
 def dump_pickle(vectorizer, classifier):
-    pickle.dump(vectorizer, open(f"models/{file_string}_vectorizer.pickle", "wb"))
-    pickle.dump(classifier, open(f"models/{file_string}_finalized_model.sav", 'wb'))
+    pickle.dump(vectorizer, open(f"apps/models/{file_string}_vectorizer.pickle", "wb"))
+    pickle.dump(classifier, open(f"apps/models/{file_string}_finalized_model.sav", 'wb'))
 
 
 def load_pickle():
-    vectorizer = pickle.load(open(f"models/{file_string}_vectorizer.pickle", 'rb'))
-    classifier = pickle.load(open(f"models/{file_string}_finalized_model.sav", 'rb'))
+    vectorizer = pickle.load(open(f"apps/models/{file_string}_vectorizer.pickle", 'rb'))
+    classifier = pickle.load(open(f"apps/models/{file_string}_finalized_model.sav", 'rb'))
 
     return vectorizer, classifier
 
 
 @st.cache
 def load_data():
-    data = pd.read_csv('../datasets/language_identification.csv')
+    data = pd.read_csv('apps/datasets/language_identification.csv')
     data = data.drop_duplicates(subset='Text').reset_index(drop=True)
     train_doc, test_doc, train_labels, test_labels = train_test_split(data['Text'].values, data['language'].values,
                                                                       test_size=0.33, random_state=42)
@@ -54,19 +55,9 @@ def app():
     else:
         vectorizer, classifier = load_pickle()
 
-
-    input = st.text_input("Enter The Sentence", "Write Here...")
+    input = st.text_input("Enter The Sentence", "Enter The Text Here...")
     if st.button('Predict The Language'):
         result = classifier.predict(vectorizer.transform([input]))[0]
         st.success(result)
     else:
         st.write("Press the above button..")
-
-
-
-
-
-
-
-
-

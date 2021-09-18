@@ -8,20 +8,20 @@ file_string = "sentiment_analysis"
 
 
 def dump_pickle(vectorizer, classifier):
-    pickle.dump(vectorizer, open(f"models/{file_string}_vectorizer.pickle", "wb"))
-    pickle.dump(classifier, open(f"models/{file_string}_finalized_model.sav", 'wb'))
+    pickle.dump(vectorizer, open(f"apps/models/{file_string}_vectorizer.pickle", "wb"))
+    pickle.dump(classifier, open(f"apps/models/{file_string}_finalized_model.sav", 'wb'))
 
 
 def load_pickle():
-    vectorizer = pickle.load(open(f"models/{file_string}_vectorizer.pickle", 'rb'))
-    classifier = pickle.load(open(f"models/{file_string}_finalized_model.sav", 'rb'))
+    vectorizer = pickle.load(open(f"apps/models/{file_string}_vectorizer.pickle", 'rb'))
+    classifier = pickle.load(open(f"apps/models/{file_string}_finalized_model.sav", 'rb'))
 
     return vectorizer, classifier
 
 
 @st.cache
 def preprocess_data():
-    with open("../datasets/sentiment_labeled.txt", "r") as text_file:
+    with open("apps/datasets/sentiment_labeled.txt", "r") as text_file:
         data = text_file.read().split('\n')
 
     processed_data = []
@@ -60,7 +60,7 @@ def app():
     else:
         vectorizer, classifier = load_pickle()
 
-    input = st.text_input("Enter The Sentence", "Write Here...")
+    input = st.text_input("Enter The Sentence", "Enter The Text Here...")
     if st.button('Predict The Sentiment'):
         result = classifier.predict(vectorizer.transform([input]))[0]
         print_text = "Positive" if result[0] == '1' else "Negative"
