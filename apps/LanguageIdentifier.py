@@ -1,8 +1,7 @@
+import pandas as pd
 import streamlit as st
 
 from apps.AlgorithmProcessor import AlgorithmProcessor
-
-file_string = "language_identifier"
 
 
 class LanguageIdentifier(AlgorithmProcessor):
@@ -14,9 +13,15 @@ class LanguageIdentifier(AlgorithmProcessor):
                          pickle_path=pickle_path,
                          model_type=model_type)
 
-    def run(self):
-        self.add_train_option()
-        self.predict_input()
+    @st.cache
+    def load_data(self):
+        data = pd.read_csv('apps/datasets/language_identification.csv')
+        data = data.drop_duplicates(subset='Text').reset_index(drop=True)
+
+        train_doc = data['Text'].values
+        train_labels = data['language'].values
+
+        return train_doc, train_labels
 
 
 def app():

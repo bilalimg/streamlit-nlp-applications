@@ -1,50 +1,35 @@
-import pickle
-
 import streamlit as st
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_extraction.text import CountVectorizer
 
-file_string = "sentiment_analysis"
+from apps.AlgorithmProcessor import AlgorithmProcessor
 
 
-def dump_pickle(vectorizer, classifier):
-    pickle.dump(vectorizer, open(f"apps/models/{file_string}_vectorizer.pickle", "wb"))
-    pickle.dump(classifier, open(f"apps/models/{file_string}_finalized_model.sav", 'wb'))
+class SentimentAnalysis(AlgorithmProcessor):
+    def __init__(self,
+                 file_string: str = "sentiment_analysis",
+                 pickle_path: str = "apps/models/sentiment_analysis/",
+                 model_type: str = "BernoulliNB"):
+        super().__init__(file_string=file_string,
+                         pickle_path=pickle_path,
+                         model_type=model_type)
 
+    @st.cache
+    def load_data(self):
+        with open("apps/datasets/sentiment_labeled.txt", "r") as text_file:
+            data = text_file.read().split('\n')
 
-def load_pickle():
-    vectorizer = pickle.load(open(f"apps/models/{file_string}_vectorizer.pickle", 'rb'))
-    classifier = pickle.load(open(f"apps/models/{file_string}_finalized_model.sav", 'rb'))
+        processed_data = []
+        for single_data in data:
+            if len(single_data.split("\t")) == 2 and single_data.split("\t")[1] != "":
+                processed_data.append(single_data.split("\t"))
 
-    return vectorizer, classifier
+        train_doc = [processed_data[0] for processed_data in processed_data]
+        train_labels = [processed_data[1] for processed_data in processed_data]
 
+        return train_doc, train_labels
 
-@st.cache
-def preprocess_data():
-    with open("apps/datasets/sentiment_labeled.txt", "r") as text_file:
-        data = text_file.read().split('\n')
-
-    processed_data = []
-    for single_data in data:
-        if len(single_data.split("\t")) == 2 and single_data.split("\t")[1] != "":
-            processed_data.append(single_data.split("\t"))
-
-    train_doc = [processed_data[0] for processed_data in processed_data]
-    train_labels = [processed_data[1] for processed_data in processed_data]
-
-    return train_doc, train_labels
-
-
-def train_model(train_doc, train_labels):
-    vectorizer = CountVectorizer(binary='true')
-    vector = vectorizer.fit_transform(train_doc)
-
-    classifier = RandomForestClassifier()
-    classifier.fit(vector, train_labels)
-
-    dump_pickle(vectorizer, classifier)
-
-    return vectorizer, classifier
+    def print_result(self, result):
+        print_result = "Positive" if result[0] == '1' else "Negative"
+        st.success(print_result)
 
 
 def app():
@@ -53,17 +38,5 @@ def app():
     st.title("Sentiment Analyzer")
     st.write('\n\n')
 
-    train_doc, train_labels = preprocess_data()
-
-    if st.sidebar.button("Click to train a new model"):
-        vectorizer, classifier = train_model(train_doc, train_labels)
-    else:
-        vectorizer, classifier = load_pickle()
-
-    input = st.text_input("Enter The Sentence", "Enter The Text Here...")
-    if st.button('Predict The Sentiment'):
-        result = classifier.predict(vectorizer.transform([input]))[0]
-        print_text = "Positive" if result[0] == '1' else "Negative"
-        st.success(print_text)
-    else:
-        st.write("Press the above button..")
+    class_process = SentimentAnalysis()
+    class_process.run()

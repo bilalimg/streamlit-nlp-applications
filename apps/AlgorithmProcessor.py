@@ -1,11 +1,9 @@
 import pickle
 
-import pandas as pd
 import streamlit as st
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.naive_bayes import BernoulliNB
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import BernoulliNB
 
 
 class AlgorithmProcessor:
@@ -24,7 +22,7 @@ class AlgorithmProcessor:
 
     def add_train_option(self):
         if st.sidebar.button("Click to train a new model"):
-            self.vectorizer, self.classifier = self.train_model()
+            self.train_model()
         else:
             try:
                 self.vectorizer, self.classifier = self.load_pickle()
@@ -32,24 +30,21 @@ class AlgorithmProcessor:
                 st.error(f"Error occurred while getting models, please train a new model.")
 
     def train_model(self):
-        train_doc, test_doc, train_labels, test_labels = self.load_data()
-        vectorizer = CountVectorizer()
-        vector = vectorizer.fit_transform(train_doc)
+        train_doc, train_labels = self.load_data()
+        self.vectorizer = CountVectorizer()
+        vector = self.vectorizer.fit_transform(train_doc)
 
-        classifier = RandomForestClassifier()
-        classifier.fit(vector, train_labels)
+        self.classifier = self.get_classifier()
+        self.classifier.fit(vector, train_labels)
 
-        self.dump_pickle(vectorizer, classifier)
+        self.dump_pickle()
 
-        return vectorizer, classifier
+        st.sidebar.success("New model is trained and saved successfully.")
 
-    @st.cache
+        return
+
     def load_data(self):
-        data = pd.read_csv('apps/datasets/language_identification.csv')
-        data = data.drop_duplicates(subset='Text').reset_index(drop=True)
-        train_doc, test_doc, train_labels, test_labels = train_test_split(data['Text'].values, data['language'].values,
-                                                                          test_size=0.1, random_state=42)
-        return train_doc, test_doc, train_labels, test_labels
+        return
 
     def get_classifier(self):
         if self.model_type == "RandomForestClassifier":
@@ -61,9 +56,12 @@ class AlgorithmProcessor:
         input = st.text_input("Enter The Sentence", "Enter The Text Here...")
         if st.button('Predict The Result'):
             result = self.classifier.predict(self.vectorizer.transform([input]))[0]
-            st.success(result)
+            self.print_result(result)
         else:
             st.write("Press the above button..")
+
+    def print_result(self, result):
+        st.success(result)
 
     def dump_pickle(self):
         pickle.dump(self.vectorizer, open(f"{self.pickle_path}{self.file_string}_vectorizer.pickle", "wb"))
