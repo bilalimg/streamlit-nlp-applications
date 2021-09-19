@@ -28,7 +28,7 @@ class AlgorithmProcessor:
         Init function of AlgorithmProcessor, which initiates actions to be displayed in the interface in Streamlit.
         """
         self.add_train_option()
-        self.predict_input()
+        self.inference_the_input()
 
     def add_train_option(self):
         """
