@@ -5,15 +5,18 @@ from apps.AlgorithmProcessor import AlgorithmProcessor
 
 class SentimentAnalysis(AlgorithmProcessor):
     def __init__(self,
-                 file_string: str = "sentiment_analysis",
                  pickle_path: str = "apps/models/sentiment_analysis/",
                  model_type: str = "BernoulliNB"):
-        super().__init__(file_string=file_string,
-                         pickle_path=pickle_path,
+        super().__init__(pickle_path=pickle_path,
                          model_type=model_type)
 
     @st.cache
-    def load_data(self):
+    def load_training_data(self):
+        """
+        Loads train data for training.
+
+        @return: Train data and Train labels.
+        """
         with open("apps/datasets/sentiment_labeled.txt", "r") as text_file:
             data = text_file.read().split('\n')
 
@@ -28,6 +31,11 @@ class SentimentAnalysis(AlgorithmProcessor):
         return train_doc, train_labels
 
     def print_result(self, result):
+        """
+        Prints the inference result.
+
+        @param result: Inference result.
+        """
         print_result = "Positive" if result[0] == '1' else "Negative"
         st.success(print_result)
 
